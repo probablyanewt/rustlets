@@ -16,6 +16,9 @@ static LOG: LazyLock<Logrs> = LazyLock::new(|| match LOG_BUILDER.lock() {
 });
 
 static ONCE_SET_LOG_LEVEL: Once = Once::new();
+/// Set the default log level on the global logrs instance.
+/// This function will only modify the global instance once. Further calls do nothing.
+/// Once the first logging function has been called, the instance can no longer be modified.
 pub fn set_log_level(log_level: LogLevel) {
     ONCE_SET_LOG_LEVEL.call_once(|| match LOG_BUILDER.lock() {
         Ok(mut builder) => {
@@ -26,6 +29,9 @@ pub fn set_log_level(log_level: LogLevel) {
 }
 
 static ONCE_SET_TIMESTAMP: Once = Once::new();
+/// Set the timestamp settings on global logrs instance.
+/// This function will only modify the global instance once. Further calls do nothing.
+/// Once the first logging function has been called, the instance can no longer be modified.
 pub fn set_timestamp(timestamp: Timestamp) {
     ONCE_SET_TIMESTAMP.call_once(|| match LOG_BUILDER.lock() {
         Ok(mut builder) => {
@@ -36,6 +42,9 @@ pub fn set_timestamp(timestamp: Timestamp) {
 }
 
 static ONCE_SET_LOGGING_FUNCTION: Once = Once::new();
+/// Set the logging function on the global logrs instance.
+/// This function will only modify the global instance once. Further calls do nothing.
+/// Once the first logging function has been called, the instance can no longer be modified.
 pub fn set_logging_function(f: fn(String) -> ()) {
     ONCE_SET_LOGGING_FUNCTION.call_once(|| match LOG_BUILDER.lock() {
         Ok(mut builder) => {
@@ -46,6 +55,9 @@ pub fn set_logging_function(f: fn(String) -> ()) {
 }
 
 static ONCE_DISABLE_ANSI: Once = Once::new();
+/// Disable internal ansi codes on global logrs instance.
+/// This function will only modify the global instance once. Further calls do nothing.
+/// Once the first logging function has been called, the instance can no longer be modified.
 pub fn disable_ansi() {
     ONCE_DISABLE_ANSI.call_once(|| match LOG_BUILDER.lock() {
         Ok(mut builder) => {

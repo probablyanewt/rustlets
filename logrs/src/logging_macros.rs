@@ -25,15 +25,15 @@ macro_rules! log_methods_at_level {
 #[macro_export]
 macro_rules! log_fns_at_level {
     ($log_name: ident, $logf_name:ident, $logp_name:ident) => {
-        /// Log a str
+        /// Log a str using a global logrs instance.
         pub fn $log_name(msg: &str) {
             LOG.$log_name(msg);
         }
-        /// Log a str with data
+        /// Log a str with data using a global logrs instance.
         pub fn $logf_name(msg: &str, data: &dyn fmt::Debug) {
             LOG.$logf_name(msg, data);
         }
-        /// Log data using std_ex::fmt::pretty
+        /// Log data using std_ex::fmt::pretty using a global logrs instance.
         pub fn $logp_name(data: &dyn std::fmt::Debug) {
             LOG.$logp_name(data);
         }
