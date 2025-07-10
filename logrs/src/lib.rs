@@ -1,5 +1,5 @@
 use std::fmt;
-use std::sync::LazyLock;
+use std::sync::{LazyLock, Mutex, Once};
 
 pub use log_level::*;
 pub use logrs::*;
@@ -9,7 +9,51 @@ mod log_level;
 mod logging_macros;
 mod logrs;
 
-static LOG: LazyLock<Logrs> = LazyLock::new(|| Logrs::default());
+static LOG_BUILDER: LazyLock<Mutex<LogrsBuilder>> = LazyLock::new(|| Mutex::new(Logrs::new_ex()));
+static LOG: LazyLock<Logrs> = LazyLock::new(|| match LOG_BUILDER.lock() {
+    Ok(builder) => builder.done(),
+    Err(_) => Logrs::default(),
+});
+
+static ONCE_SET_LOG_LEVEL: Once = Once::new();
+pub fn set_log_level(log_level: LogLevel) {
+    ONCE_SET_LOG_LEVEL.call_once(|| match LOG_BUILDER.lock() {
+        Ok(mut builder) => {
+            builder.set_log_level(log_level);
+        }
+        Err(_) => return,
+    })
+}
+
+static ONCE_SET_TIMESTAMP: Once = Once::new();
+pub fn set_timestamp(timestamp: Timestamp) {
+    ONCE_SET_TIMESTAMP.call_once(|| match LOG_BUILDER.lock() {
+        Ok(mut builder) => {
+            builder.set_timestamp(timestamp);
+        }
+        Err(_) => return,
+    })
+}
+
+static ONCE_SET_LOGGING_FUNCTION: Once = Once::new();
+pub fn set_logging_function(f: fn(String) -> ()) {
+    ONCE_SET_LOGGING_FUNCTION.call_once(|| match LOG_BUILDER.lock() {
+        Ok(mut builder) => {
+            builder.set_logging_function(f);
+        }
+        Err(_) => return,
+    })
+}
+
+static ONCE_DISABLE_ANSI: Once = Once::new();
+pub fn disable_ansi() {
+    ONCE_DISABLE_ANSI.call_once(|| match LOG_BUILDER.lock() {
+        Ok(mut builder) => {
+            builder.disable_ansi();
+        }
+        Err(_) => return,
+    })
+}
 
 log_fns_at_level!(trace, tracef, tracep);
 log_fns_at_level!(debug, debugf, debugp);

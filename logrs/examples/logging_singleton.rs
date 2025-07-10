@@ -12,6 +12,9 @@ pub fn main() {
         field: "value",
         other_field: 123,
     };
+    logrs::set_log_level(logrs::LogLevel::Trace);
+    logrs::set_timestamp(logrs::Timestamp::Time);
+    logrs::set_timestamp(logrs::Timestamp::None);
     logrs::trace("Trace log");
     logrs::debug("Debug log");
     logrs::info("Info log");
