@@ -164,7 +164,7 @@ impl LogrsBuilder {
     /// Disables internal use of ansi codes.
     /// For now, any ansi codes passed into the logging functions will be untouched.
     pub fn disable_ansi(&mut self) -> &mut Self {
-        self.instance.suppress_ansi = false;
+        self.instance.suppress_ansi = true;
         self
     }
 
