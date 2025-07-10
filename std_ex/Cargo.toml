@@ -1,0 +1,10 @@
+[package]
+name = "std_ex"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+src = "./src/lib.rs"
+
+[dependencies]
+chrono = "0.4.41"
