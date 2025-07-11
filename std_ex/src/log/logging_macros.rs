@@ -1,4 +1,4 @@
-#[macro_export]
+// pub(super) mod logging_macros {
 macro_rules! log_methods_at_level {
     ($log_name: ident, $logf_name:ident, $logp_name:ident, $level: ident) => {
         /// Log a message
@@ -22,20 +22,20 @@ macro_rules! log_methods_at_level {
     };
 }
 
-#[macro_export]
 macro_rules! log_fns_at_level {
     ($log_name: ident, $logf_name:ident, $logp_name:ident) => {
-        /// Log a str using a global logrs instance.
+        /// Log a str using a global log instance.
         pub fn $log_name(msg: &str) {
             LOG.$log_name(msg);
         }
-        /// Log a str with data using a global logrs instance.
+        /// Log a str with data using a global log instance.
         pub fn $logf_name(msg: &str, data: &dyn crate::fmt::Debug) {
             LOG.$logf_name(msg, data);
         }
-        /// Log data using crate_ex::fmt::pretty using a global logrs instance.
+        /// Log data using crate_ex::fmt::pretty using a global log instance.
         pub fn $logp_name(data: &dyn crate::fmt::Debug) {
             LOG.$logp_name(data);
         }
     };
 }
+// }

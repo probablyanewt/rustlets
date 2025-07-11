@@ -1,7 +1,4 @@
-use crate::{
-    log_fns_at_level,
-    sync::{LazyLock, Mutex, Once},
-};
+use crate::sync::{LazyLock, Mutex, Once};
 
 pub use log::*;
 pub use log_level::*;
@@ -9,7 +6,6 @@ pub use log_level::*;
 pub mod ansi;
 mod log;
 mod log_level;
-mod logging_macros;
 
 static LOG_BUILDER: LazyLock<Mutex<LogrsBuilder>> = LazyLock::new(|| Mutex::new(Log::new_ex()));
 static LOG: LazyLock<Log> = LazyLock::new(|| match LOG_BUILDER.lock() {
@@ -67,6 +63,23 @@ pub fn disable_ansi() {
         }
         Err(_) => return,
     })
+}
+
+macro_rules! log_fns_at_level {
+    ($log_name: ident, $logf_name:ident, $logp_name:ident) => {
+        /// Log a str using a global log instance.
+        pub fn $log_name(msg: &str) {
+            LOG.$log_name(msg);
+        }
+        /// Log a str with data using a global log instance.
+        pub fn $logf_name(msg: &str, data: &dyn crate::fmt::Debug) {
+            LOG.$logf_name(msg, data);
+        }
+        /// Log data using crate_ex::fmt::pretty using a global log instance.
+        pub fn $logp_name(data: &dyn crate::fmt::Debug) {
+            LOG.$logp_name(data);
+        }
+    };
 }
 
 log_fns_at_level!(trace, tracef, tracep);

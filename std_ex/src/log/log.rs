@@ -1,5 +1,4 @@
 use crate::log::{LogLevel, ansi};
-use crate::log_methods_at_level;
 use crate::{env, fmt, fmt::Display, str::FromStr, time};
 
 const AWS_LAMBDA_ENV_VAR_NAME: &str = "AWS_LAMBDA_FUNCTION_NAME";
@@ -57,6 +56,29 @@ impl Default for LogrsBuilder {
             instance: Log::default(),
         }
     }
+}
+
+macro_rules! log_methods_at_level {
+    ($log_name: ident, $logf_name:ident, $logp_name:ident, $level: ident) => {
+        /// Log a message
+        pub fn $log_name<T: AsRef<str>>(&self, msg: T)
+        where
+            T: crate::fmt::Display,
+        {
+            self.logger(LogLevel::$level, msg);
+        }
+        /// Log a message with data
+        pub fn $logf_name<T: AsRef<str>>(&self, msg: T, data: &dyn crate::fmt::Debug)
+        where
+            T: crate::fmt::Display,
+        {
+            self.$log_name(format!("{}\n{:#?}", msg, data));
+        }
+        /// Log data using crate_ex::fmt::pretty
+        pub fn $logp_name(&self, data: &dyn crate::fmt::Debug) {
+            self.$log_name(crate::fmt::pretty(data));
+        }
+    };
 }
 
 impl Log {
