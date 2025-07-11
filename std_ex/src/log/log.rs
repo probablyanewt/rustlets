@@ -1,5 +1,6 @@
-use crate::{LogLevel, ansi, log_methods_at_level};
-use std::{env, fmt, fmt::Display, str::FromStr, time};
+use crate::log::{LogLevel, ansi};
+use crate::log_methods_at_level;
+use crate::{env, fmt, fmt::Display, str::FromStr, time};
 
 const AWS_LAMBDA_ENV_VAR_NAME: &str = "AWS_LAMBDA_FUNCTION_NAME";
 const LOG_LEVEL_ENV_VAR_NAME: &str = "LOG_LEVEL";
@@ -11,8 +12,20 @@ pub enum Timestamp {
     DateAndTime,
 }
 
+impl ToString for Timestamp {
+    fn to_string(&self) -> String {
+        match self {
+            Timestamp::None => String::from(""),
+            Timestamp::Time => time::Local::now().format("[%H:%M:%S%.3f] ").to_string(),
+            Timestamp::DateAndTime => time::Local::now()
+                .format("[%Y-%m-%d %H:%M:%S%.3f] ")
+                .to_string(),
+        }
+    }
+}
+
 #[derive(Clone)]
-pub struct Logrs {
+pub struct Log {
     context: String,
     log_level: LogLevel,
     logging_function: fn(String) -> (),
@@ -22,10 +35,10 @@ pub struct Logrs {
 }
 
 pub struct LogrsBuilder {
-    instance: Logrs,
+    instance: Log,
 }
 
-impl Default for Logrs {
+impl Default for Log {
     fn default() -> Self {
         Self {
             context: String::from(""),
@@ -41,15 +54,15 @@ impl Default for Logrs {
 impl Default for LogrsBuilder {
     fn default() -> Self {
         Self {
-            instance: Logrs::default(),
+            instance: Log::default(),
         }
     }
 }
 
-impl Logrs {
+impl Log {
     /// Create new instance with default settings
     pub fn new() -> Self {
-        Logrs::default()
+        Log::default()
     }
 
     /// Create instance with optional customisations using builder pattern.
@@ -116,13 +129,7 @@ impl Logrs {
     where
         T: Display,
     {
-        let timestamp = match self.timestamp {
-            Timestamp::None => String::from(""),
-            Timestamp::Time => time::Local::now().format("[%H:%M:%S%.3f] ").to_string(),
-            Timestamp::DateAndTime => time::Local::now()
-                .format("[%Y-%m-%d %H:%M:%S%.3f] ")
-                .to_string(),
-        };
+        let timestamp = self.timestamp.to_string();
         let colour = match self.suppress_ansi {
             true => String::from(""),
             false => ansi::Colour::from(log_level).to_string(),
@@ -194,21 +201,22 @@ impl LogrsBuilder {
     }
 
     /// Done building and return logrs instance.
-    pub fn done(&self) -> Logrs {
+    pub fn done(&self) -> Log {
         self.instance.clone()
     }
 }
 
 #[cfg(test)]
 mod should_log_tests {
-    use crate::Logrs;
-    use crate::log_level::LogLevel;
-    use crate::logrs::LOG_LEVEL_ENV_VAR_NAME;
+    use super::*;
+    // use crate::Logrs;
+    // use crate::log_level::LogLevel;
+    // use crate::logrs::LOG_LEVEL_ENV_VAR_NAME;
     use std::env;
 
     #[test]
     fn should_return_true_if_info_configure_and_loggin_at_error() {
-        assert!(Logrs::new().should_log(LogLevel::Error))
+        assert!(Log::new().should_log(LogLevel::Error))
     }
 
     #[test]
@@ -216,6 +224,6 @@ mod should_log_tests {
         unsafe {
             env::set_var(LOG_LEVEL_ENV_VAR_NAME, "trace");
         }
-        assert!(Logrs::new().should_log(LogLevel::Trace))
+        assert!(Log::new().should_log(LogLevel::Trace))
     }
 }

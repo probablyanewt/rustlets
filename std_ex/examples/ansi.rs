@@ -1,7 +1,7 @@
-use logrs::{LogLevel, Logrs, ansi};
+use std_ex::log::{Log, LogLevel, ansi};
 
 pub fn main() {
-    let log = Logrs::new_ex().set_log_level(LogLevel::Trace).done();
+    let log = Log::new_ex().set_log_level(LogLevel::Trace).done();
     log.trace(format!(
         "{},{},{}",
         ansi::Colour::Magenta.paint("Trace log"),

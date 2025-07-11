@@ -1,4 +1,4 @@
-use std::{fmt::Display, str::FromStr};
+use crate::{fmt::Display, str::FromStr};
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Eq, Hash)]
 pub enum LogLevel {

@@ -1,6 +1,7 @@
-use std::fmt;
-
-use logrs::{LogLevel, Logrs};
+use std_ex::{
+    fmt,
+    log::{Log, LogLevel},
+};
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -10,7 +11,7 @@ struct Data<'a> {
 }
 
 pub fn main() {
-    let log = Logrs::new_ex().set_log_level(LogLevel::Trace).done();
+    let log = Log::new_ex().set_log_level(LogLevel::Trace).done();
     let data = Data {
         field: "value",
         other_field: 123,

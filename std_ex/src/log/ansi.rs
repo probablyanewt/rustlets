@@ -1,7 +1,10 @@
-use std::fmt::{Display, format};
-use std::{collections::HashMap, sync::LazyLock, u8};
-
-use crate::LogLevel;
+use crate::{
+    collections::HashMap,
+    fmt::{Display, format},
+    log::LogLevel,
+    sync::LazyLock,
+    u8,
+};
 
 type Ansi = &'static str;
 
@@ -27,12 +30,14 @@ const WHITE: Ansi = "\x1B[37m";
 
 const DEFAULT_COLOURS: LazyLock<HashMap<LogLevel, Colour>> = LazyLock::new(|| {
     let mut hashmap = HashMap::new();
+
     hashmap.insert(LogLevel::Trace, Colour::Grey);
     hashmap.insert(LogLevel::Debug, Colour::Magenta);
     hashmap.insert(LogLevel::Info, Colour::Blue);
     hashmap.insert(LogLevel::Warn, Colour::Yellow);
     hashmap.insert(LogLevel::Error, Colour::Red);
     hashmap.insert(LogLevel::Fatal, Colour::Red);
+
     hashmap
 });
 

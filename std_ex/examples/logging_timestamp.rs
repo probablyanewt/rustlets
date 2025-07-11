@@ -1,7 +1,10 @@
-use logrs::{LogLevel, Logrs};
+use std_ex::log::{Log, LogLevel, Timestamp};
 
 pub fn main() {
-    let log = Logrs::new_ex().set_log_level(LogLevel::Trace).done();
+    let log = Log::new_ex()
+        .set_log_level(LogLevel::Trace)
+        .set_timestamp(Timestamp::DateAndTime)
+        .done();
     log.trace("Trace log");
     log.debug("Debug log");
     log.info("Info log");

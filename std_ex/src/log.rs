@@ -1,18 +1,20 @@
-use std::fmt;
-use std::sync::{LazyLock, Mutex, Once};
+use crate::{
+    log_fns_at_level,
+    sync::{LazyLock, Mutex, Once},
+};
 
+pub use log::*;
 pub use log_level::*;
-pub use logrs::*;
 
 pub mod ansi;
+mod log;
 mod log_level;
 mod logging_macros;
-mod logrs;
 
-static LOG_BUILDER: LazyLock<Mutex<LogrsBuilder>> = LazyLock::new(|| Mutex::new(Logrs::new_ex()));
-static LOG: LazyLock<Logrs> = LazyLock::new(|| match LOG_BUILDER.lock() {
+static LOG_BUILDER: LazyLock<Mutex<LogrsBuilder>> = LazyLock::new(|| Mutex::new(Log::new_ex()));
+static LOG: LazyLock<Log> = LazyLock::new(|| match LOG_BUILDER.lock() {
     Ok(builder) => builder.done(),
-    Err(_) => Logrs::default(),
+    Err(_) => Log::default(),
 });
 
 static ONCE_SET_LOG_LEVEL: Once = Once::new();
