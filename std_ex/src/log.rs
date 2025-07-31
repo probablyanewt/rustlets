@@ -68,11 +68,17 @@ pub fn disable_ansi() {
 macro_rules! log_fns_at_level {
     ($log_name: ident, $logf_name:ident, $logp_name:ident) => {
         /// Log a str using a global log instance.
-        pub fn $log_name(msg: &str) {
+        pub fn $log_name<T: AsRef<str>>(msg: T)
+        where
+            T: crate::fmt::Display,
+        {
             LOG.$log_name(msg);
         }
         /// Log a str with data using a global log instance.
-        pub fn $logf_name(msg: &str, data: &dyn crate::fmt::Debug) {
+        pub fn $logf_name<T: AsRef<str>>(msg: T, data: &dyn crate::fmt::Debug)
+        where
+            T: crate::fmt::Display,
+        {
             LOG.$logf_name(msg, data);
         }
         /// Log data using crate_ex::fmt::pretty using a global log instance.
