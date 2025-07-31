@@ -1,15 +1,18 @@
-use std_ex::log::{Log, LogLevel, ansi};
+use std_ex::{
+    log::{Log, LogLevel},
+    term,
+};
 
 pub fn main() {
     let log = Log::new_ex().set_log_level(LogLevel::Trace).done();
     log.trace(format!(
         "{},{},{}",
-        ansi::Colour::Magenta.paint("Trace log"),
-        ansi::Colour::Yellow.paint(" with some colour"),
+        term::Colour::Magenta.paint("Trace log"),
+        term::Colour::Yellow.paint(" with some colour"),
         format!(
             "{}{}",
-            ansi::Colour::Green.paint("deep nested formats"),
-            ansi::Colour::Blue.paint(" everywhere")
+            term::Colour::Green.paint("deep nested formats"),
+            term::Colour::Blue.paint(" everywhere")
         )
     ));
     log.debug("Debug log");

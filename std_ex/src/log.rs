@@ -3,7 +3,6 @@ use crate::sync::{LazyLock, Mutex, Once};
 pub use log::*;
 pub use log_level::*;
 
-pub mod ansi;
 mod log;
 mod log_level;
 

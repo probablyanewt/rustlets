@@ -1,5 +1,6 @@
-use crate::log::{LogLevel, ansi};
-use crate::{env, fmt, fmt::Display, str::FromStr, time};
+use crate::log::LogLevel;
+use crate::term;
+use crate::{chrono, env, fmt, fmt::Display, str::FromStr};
 
 const AWS_LAMBDA_ENV_VAR_NAME: &str = "AWS_LAMBDA_FUNCTION_NAME";
 const LOG_LEVEL_ENV_VAR_NAME: &str = "LOG_LEVEL";
@@ -15,8 +16,8 @@ impl ToString for Timestamp {
     fn to_string(&self) -> String {
         match self {
             Timestamp::None => String::from(""),
-            Timestamp::Time => time::Local::now().format("[%H:%M:%S%.3f] ").to_string(),
-            Timestamp::DateAndTime => time::Local::now()
+            Timestamp::Time => chrono::Local::now().format("[%H:%M:%S%.3f] ").to_string(),
+            Timestamp::DateAndTime => chrono::Local::now()
                 .format("[%Y-%m-%d %H:%M:%S%.3f] ")
                 .to_string(),
         }
@@ -154,12 +155,12 @@ impl Log {
         let timestamp = self.timestamp.to_string();
         let colour = match self.suppress_ansi {
             true => String::from(""),
-            false => ansi::Colour::from(log_level).to_string(),
+            false => term::Colour::from(log_level).to_string(),
         };
         let level = log_level.to_string().to_uppercase();
         let colour_off = match self.suppress_ansi {
             true => String::from(""),
-            false => ansi::Colour::Off.to_string(),
+            false => term::Colour::Off.to_string(),
         };
         let prefix = &self.prefix;
         let context = &self.context;

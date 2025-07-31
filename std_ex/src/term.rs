@@ -1,0 +1,212 @@
+use crate::fmt::Display;
+
+type Ansi = &'static str;
+
+const CLEAR_TERMINAL: Ansi = "\x1B[2J";
+const CLEAR_LINE: Ansi = "\x1B[2K";
+const BOLD_ON: Ansi = "\x1B[1m";
+const BOLD_OFF: Ansi = "\x1B[22m";
+const RESET: Ansi = "\x1B[0m";
+const UNDERLINE_ON: Ansi = "\x1B[4m";
+const UNDERLINE_OFF: Ansi = "\x1B[24m";
+
+const COLOUR_OFF: Ansi = "\x1B[39m";
+const BLACK: Ansi = "\x1B[30m";
+const BLUE: Ansi = "\x1B[34m";
+const CYAN: Ansi = "\x1B[36m";
+const GREEN: Ansi = "\x1B[32m";
+const GREY: Ansi = "\x1B[90m";
+const MAGENTA: Ansi = "\x1B[35m";
+const ORANGE: Ansi = "\x1B[91m";
+const RED: Ansi = "\x1B[31m";
+const YELLOW: Ansi = "\x1B[33m";
+const WHITE: Ansi = "\x1B[37m";
+
+#[derive(Clone)]
+pub enum Colour {
+    Black,
+    Blue,
+    Cyan,
+    Green,
+    Grey,
+    Magenta,
+    Orange,
+    Red,
+    Yellow,
+    White,
+    Off,
+}
+
+pub struct CustomColour {
+    value: String,
+}
+
+impl Colour {
+    pub fn paint_with<T: AsRef<str>>(colour: Colour, s: T) -> String
+    where
+        T: Display,
+    {
+        format!("{}{}{}", colour, s, Colour::Off)
+    }
+
+    pub fn paint<T: AsRef<str>>(&self, s: T) -> String
+    where
+        T: Display,
+    {
+        format!("{}{}{}", &self, s, Colour::Off)
+    }
+
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            Colour::Off => COLOUR_OFF,
+            Colour::Black => BLACK,
+            Colour::Blue => BLUE,
+            Colour::Cyan => CYAN,
+            Colour::Green => GREEN,
+            Colour::Grey => GREY,
+            Colour::Magenta => MAGENTA,
+            Colour::Orange => ORANGE,
+            Colour::Red => RED,
+            Colour::Yellow => YELLOW,
+            Colour::White => WHITE,
+        }
+    }
+
+    pub fn custom(r: usize, g: usize, b: usize) -> CustomColour {
+        CustomColour {
+            value: format!("\x1B[38;2;{r};{g};{b}m"),
+        }
+    }
+}
+
+impl CustomColour {
+    pub fn paint_with<T: AsRef<str>>(colour: Colour, s: T) -> String
+    where
+        T: Display,
+    {
+        format!("{}{}{}", colour, s, Colour::Off)
+    }
+
+    pub fn paint<T: AsRef<str>>(&self, s: T) -> String
+    where
+        T: Display,
+    {
+        format!("{}{}{}", &self, s, Colour::Off)
+    }
+}
+
+impl Display for Colour {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl Display for CustomColour {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
+macro_rules! ansi_format_fn {
+    ($fn_name: ident, $format_on: ident, $format_off: ident) => {
+        pub fn $fn_name(s: String) -> String {
+            format!("{}{}{}", $format_on, s, $format_off)
+        }
+    };
+}
+
+ansi_format_fn!(bold, BOLD_ON, BOLD_OFF);
+ansi_format_fn!(underline, UNDERLINE_ON, UNDERLINE_OFF);
+
+pub fn clear() {
+    eprintln!("{}", CLEAR_TERMINAL);
+}
+
+pub fn clear_line() {
+    eprintln!("{}", CLEAR_LINE);
+}
+
+pub struct Printer {
+    bold_prefix: &'static str,
+    bold_suffix: &'static str,
+    colour_prefix: &'static str,
+    colour_suffix: &'static str,
+    underline_prefix: &'static str,
+    underline_suffix: &'static str,
+}
+
+impl Printer {
+    pub const fn new() -> Self {
+        Self {
+            bold_prefix: "",
+            bold_suffix: "",
+            colour_prefix: "",
+            colour_suffix: "",
+            underline_prefix: "",
+            underline_suffix: "",
+        }
+    }
+
+    pub const fn set_bold(mut self) -> Self {
+        self.bold_prefix = BOLD_ON;
+        self.bold_suffix = BOLD_OFF;
+        self
+    }
+
+    pub const fn set_underline(mut self) -> Self {
+        self.underline_prefix = UNDERLINE_ON;
+        self.underline_suffix = UNDERLINE_OFF;
+        self
+    }
+
+    pub const fn set_colour(mut self, colour: Colour) -> Self {
+        self.colour_prefix = colour.as_str();
+        self.colour_suffix = COLOUR_OFF;
+        self
+    }
+
+    pub fn print<T: AsRef<str>>(&self, str: T)
+    where
+        T: Display,
+    {
+        print!("{}", self.format(str))
+    }
+
+    pub fn println<T: AsRef<str>>(&self, str: T)
+    where
+        T: Display,
+    {
+        println!("{}", self.format(str))
+    }
+
+    pub fn eprint<T: AsRef<str>>(&self, str: T)
+    where
+        T: Display,
+    {
+        print!("{}", self.format(str))
+    }
+
+    pub fn eprintln<T: AsRef<str>>(&self, str: T)
+    where
+        T: Display,
+    {
+        eprintln!("{}", self.format(str))
+    }
+
+    fn format<T: AsRef<str>>(&self, str: T) -> String
+    where
+        T: Display,
+    {
+        format!(
+            "{}{}{}{str}{}{}{}",
+            self.underline_prefix,
+            self.bold_prefix,
+            self.colour_prefix,
+            self.colour_suffix,
+            self.bold_suffix,
+            self.underline_suffix
+        )
+    }
+}
+
+static TEST: Printer = Printer::new().set_colour(Colour::Blue);
