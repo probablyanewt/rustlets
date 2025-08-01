@@ -182,7 +182,7 @@ pub fn reset() {
     eprintln!("{}", RESET)
 }
 
-pub struct Printer {
+pub struct PrinterBuilder {
     bold_prefix: &'static str,
     bold_suffix: &'static str,
     colour_prefix: &'static str,
@@ -197,9 +197,13 @@ pub struct Printer {
     frame_suffix: &'static str,
 }
 
+pub struct Printer {
+    config: PrinterBuilder,
+}
+
 impl Printer {
-    pub const fn new() -> Self {
-        Self {
+    pub const fn new() -> PrinterBuilder {
+        PrinterBuilder {
             bold_prefix: "",
             bold_suffix: "",
             colour_prefix: "",
@@ -213,50 +217,6 @@ impl Printer {
             frame_prefix: "",
             frame_suffix: "",
         }
-    }
-
-    pub const fn set_bold(mut self) -> Self {
-        self.bold_prefix = BOLD_ON;
-        self.bold_suffix = BOLD_OFF;
-        self
-    }
-
-    pub const fn set_underline(mut self) -> Self {
-        self.underline_prefix = UNDERLINE_ON;
-        self.underline_suffix = UNDERLINE_OFF;
-        self
-    }
-
-    pub const fn set_colour(mut self, colour: Colour) -> Self {
-        self.colour_prefix = colour.as_str();
-        self.colour_suffix = COLOUR_OFF;
-        self
-    }
-
-    pub const fn set_bg_colour(mut self, colour: Colour) -> Self {
-        self.bg_prefix = colour.as_bg_str();
-        self.bg_suffix = BG_COLOUR_OFF;
-        self
-    }
-
-    pub const fn set_overline(mut self) -> Self {
-        self.overline_prefix = OVERLINE_ON;
-        self.overline_suffix = OVERLINE_OFF;
-        self
-    }
-
-    /// Mutually exclusive with set_encircled
-    pub const fn set_framed(mut self) -> Self {
-        self.frame_prefix = FRAMED_ON;
-        self.frame_suffix = FRAMED_ENCIRCLED_OFF;
-        self
-    }
-
-    /// Mutually exclusive with set_framed
-    pub const fn set_encircled(mut self) -> Self {
-        self.frame_prefix = ENCIRCLED_ON;
-        self.frame_suffix = FRAMED_ENCIRCLED_OFF;
-        self
     }
 
     pub fn print<T: AsRef<str>>(&self, str: T)
@@ -301,18 +261,68 @@ impl Printer {
     {
         format!(
             "{}{}{}{}{}{}{str}{}{}{}{}{}{}",
-            self.frame_prefix,
-            self.overline_prefix,
-            self.underline_prefix,
-            self.bold_prefix,
-            self.bg_prefix,
-            self.colour_prefix,
-            self.colour_suffix,
-            self.bg_suffix,
-            self.bold_suffix,
-            self.underline_suffix,
-            self.overline_suffix,
-            self.frame_suffix,
+            self.config.frame_prefix,
+            self.config.overline_prefix,
+            self.config.underline_prefix,
+            self.config.bold_prefix,
+            self.config.bg_prefix,
+            self.config.colour_prefix,
+            self.config.colour_suffix,
+            self.config.bg_suffix,
+            self.config.bold_suffix,
+            self.config.underline_suffix,
+            self.config.overline_suffix,
+            self.config.frame_suffix,
         )
+    }
+}
+
+impl PrinterBuilder {
+    pub const fn set_bold(mut self) -> Self {
+        self.bold_prefix = BOLD_ON;
+        self.bold_suffix = BOLD_OFF;
+        self
+    }
+
+    pub const fn set_underline(mut self) -> Self {
+        self.underline_prefix = UNDERLINE_ON;
+        self.underline_suffix = UNDERLINE_OFF;
+        self
+    }
+
+    pub const fn set_colour(mut self, colour: Colour) -> Self {
+        self.colour_prefix = colour.as_str();
+        self.colour_suffix = COLOUR_OFF;
+        self
+    }
+
+    pub const fn set_bg_colour(mut self, colour: Colour) -> Self {
+        self.bg_prefix = colour.as_bg_str();
+        self.bg_suffix = BG_COLOUR_OFF;
+        self
+    }
+
+    pub const fn set_overline(mut self) -> Self {
+        self.overline_prefix = OVERLINE_ON;
+        self.overline_suffix = OVERLINE_OFF;
+        self
+    }
+
+    /// Mutually exclusive with set_encircled
+    pub const fn set_framed(mut self) -> Self {
+        self.frame_prefix = FRAMED_ON;
+        self.frame_suffix = FRAMED_ENCIRCLED_OFF;
+        self
+    }
+
+    /// Mutually exclusive with set_framed
+    pub const fn set_encircled(mut self) -> Self {
+        self.frame_prefix = ENCIRCLED_ON;
+        self.frame_suffix = FRAMED_ENCIRCLED_OFF;
+        self
+    }
+
+    pub const fn done(self) -> Printer {
+        Printer { config: self }
     }
 }
