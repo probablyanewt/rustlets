@@ -9,6 +9,11 @@ const BOLD_OFF: Ansi = "\x1B[22m";
 const RESET: Ansi = "\x1B[0m";
 const UNDERLINE_ON: Ansi = "\x1B[4m";
 const UNDERLINE_OFF: Ansi = "\x1B[24m";
+const OVERLINE_ON: Ansi = "\x1B[53m";
+const OVERLINE_OFF: Ansi = "\x1B[55m";
+const FRAMED_ON: Ansi = "\x1B[51m";
+const ENCIRCLED_ON: Ansi = "\x1B[52m";
+const FRAMED_ENCIRCLED_OFF: Ansi = "\x1B[54m";
 
 const COLOUR_OFF: Ansi = "\x1B[39m";
 const BLACK: Ansi = "\x1B[30m";
@@ -161,6 +166,9 @@ macro_rules! ansi_format_fn {
 
 ansi_format_fn!(bold, BOLD_ON, BOLD_OFF);
 ansi_format_fn!(underline, UNDERLINE_ON, UNDERLINE_OFF);
+ansi_format_fn!(overline, OVERLINE_ON, OVERLINE_OFF);
+ansi_format_fn!(frame, FRAMED_ON, FRAMED_ENCIRCLED_OFF);
+ansi_format_fn!(encircled, ENCIRCLED_ON, FRAMED_ENCIRCLED_OFF);
 
 pub fn clear() {
     eprintln!("{}", CLEAR_TERMINAL);
@@ -179,8 +187,14 @@ pub struct Printer {
     bold_suffix: &'static str,
     colour_prefix: &'static str,
     colour_suffix: &'static str,
+    bg_prefix: &'static str,
+    bg_suffix: &'static str,
     underline_prefix: &'static str,
     underline_suffix: &'static str,
+    overline_prefix: &'static str,
+    overline_suffix: &'static str,
+    frame_prefix: &'static str,
+    frame_suffix: &'static str,
 }
 
 impl Printer {
@@ -190,8 +204,14 @@ impl Printer {
             bold_suffix: "",
             colour_prefix: "",
             colour_suffix: "",
+            bg_prefix: "",
+            bg_suffix: "",
             underline_prefix: "",
             underline_suffix: "",
+            overline_prefix: "",
+            overline_suffix: "",
+            frame_prefix: "",
+            frame_suffix: "",
         }
     }
 
@@ -210,6 +230,32 @@ impl Printer {
     pub const fn set_colour(mut self, colour: Colour) -> Self {
         self.colour_prefix = colour.as_str();
         self.colour_suffix = COLOUR_OFF;
+        self
+    }
+
+    pub const fn set_bg_colour(mut self, colour: Colour) -> Self {
+        self.bg_prefix = colour.as_bg_str();
+        self.bg_suffix = BG_COLOUR_OFF;
+        self
+    }
+
+    pub const fn set_overline(mut self) -> Self {
+        self.overline_prefix = OVERLINE_ON;
+        self.overline_suffix = OVERLINE_OFF;
+        self
+    }
+
+    /// Mutually exclusive with set_encircled
+    pub const fn set_framed(mut self) -> Self {
+        self.frame_prefix = FRAMED_ON;
+        self.frame_suffix = FRAMED_ENCIRCLED_OFF;
+        self
+    }
+
+    /// Mutually exclusive with set_framed
+    pub const fn set_encircled(mut self) -> Self {
+        self.frame_prefix = ENCIRCLED_ON;
+        self.frame_suffix = FRAMED_ENCIRCLED_OFF;
         self
     }
 
@@ -254,13 +300,19 @@ impl Printer {
         T: Display,
     {
         format!(
-            "{}{}{}{str}{}{}{}",
+            "{}{}{}{}{}{}{str}{}{}{}{}{}{}",
+            self.frame_prefix,
+            self.overline_prefix,
             self.underline_prefix,
             self.bold_prefix,
+            self.bg_prefix,
             self.colour_prefix,
             self.colour_suffix,
+            self.bg_suffix,
             self.bold_suffix,
-            self.underline_suffix
+            self.underline_suffix,
+            self.overline_suffix,
+            self.frame_suffix,
         )
     }
 }
