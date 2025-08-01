@@ -22,6 +22,18 @@ const RED: Ansi = "\x1B[31m";
 const YELLOW: Ansi = "\x1B[33m";
 const WHITE: Ansi = "\x1B[37m";
 
+const BG_COLOUR_OFF: Ansi = "\x1B[49m";
+const BLACK_BG: Ansi = "\x1B[40m";
+const BLUE_BG: Ansi = "\x1B[44m";
+const CYAN_BG: Ansi = "\x1B[46m";
+const GREEN_BG: Ansi = "\x1B[42m";
+const GREY_BG: Ansi = "\x1B[100m";
+const MAGENTA_BG: Ansi = "\x1B[45m";
+const ORANGE_BG: Ansi = "\x1B[101m";
+const RED_BG: Ansi = "\x1B[41m";
+const YELLOW_BG: Ansi = "\x1B[43m";
+const WHITE_BG: Ansi = "\x1B[47m";
+
 #[derive(Clone)]
 pub enum Colour {
     Black,
@@ -39,6 +51,7 @@ pub enum Colour {
 
 pub struct CustomColour {
     value: String,
+    bg_value: String,
 }
 
 impl Colour {
@@ -54,6 +67,20 @@ impl Colour {
         T: Display,
     {
         format!("{}{}{}", &self, s, Colour::Off)
+    }
+
+    pub fn paint_bg_with<T: AsRef<str>>(colour: Colour, s: T) -> String
+    where
+        T: Display,
+    {
+        format!("{}{}{}", colour.as_bg_str(), s, Colour::Off.as_bg_str())
+    }
+
+    pub fn paint_bg<T: AsRef<str>>(&self, s: T) -> String
+    where
+        T: Display,
+    {
+        format!("{}{}{}", &self.as_bg_str(), s, Colour::Off.as_bg_str())
     }
 
     pub const fn as_str(&self) -> &'static str {
@@ -72,26 +99,43 @@ impl Colour {
         }
     }
 
+    pub const fn as_bg_str(&self) -> &'static str {
+        match self {
+            Colour::Off => BG_COLOUR_OFF,
+            Colour::Black => BLACK_BG,
+            Colour::Blue => BLUE_BG,
+            Colour::Cyan => CYAN_BG,
+            Colour::Green => GREEN_BG,
+            Colour::Grey => GREY_BG,
+            Colour::Magenta => MAGENTA_BG,
+            Colour::Orange => ORANGE_BG,
+            Colour::Red => RED_BG,
+            Colour::Yellow => YELLOW_BG,
+            Colour::White => WHITE_BG,
+        }
+    }
+
     pub fn custom(r: usize, g: usize, b: usize) -> CustomColour {
         CustomColour {
             value: format!("\x1B[38;2;{r};{g};{b}m"),
+            bg_value: format!("\x1B[48;2;{r};{g};{b}m"),
         }
     }
 }
 
 impl CustomColour {
-    pub fn paint_with<T: AsRef<str>>(colour: Colour, s: T) -> String
-    where
-        T: Display,
-    {
-        format!("{}{}{}", colour, s, Colour::Off)
-    }
-
     pub fn paint<T: AsRef<str>>(&self, s: T) -> String
     where
         T: Display,
     {
-        format!("{}{}{}", &self, s, Colour::Off)
+        format!("{}{}{}", self, s, Colour::Off)
+    }
+
+    pub fn paint_bg<T: AsRef<str>>(&self, s: T) -> String
+    where
+        T: Display,
+    {
+        format!("{}{}{}", self.bg_value, s, Colour::Off.as_bg_str())
     }
 }
 
@@ -124,6 +168,10 @@ pub fn clear() {
 
 pub fn clear_line() {
     eprintln!("{}", CLEAR_LINE);
+}
+
+pub fn reset() {
+    eprintln!("{}", RESET)
 }
 
 pub struct Printer {
@@ -193,6 +241,14 @@ impl Printer {
         eprintln!("{}", self.format(str))
     }
 
+    pub fn clear(&self) {
+        clear();
+    }
+
+    pub fn clear_line(&self) {
+        clear_line();
+    }
+
     fn format<T: AsRef<str>>(&self, str: T) -> String
     where
         T: Display,
@@ -208,5 +264,3 @@ impl Printer {
         )
     }
 }
-
-static TEST: Printer = Printer::new().set_colour(Colour::Blue);
