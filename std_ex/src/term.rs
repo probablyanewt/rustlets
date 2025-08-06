@@ -1,4 +1,7 @@
 use crate::fmt::Display;
+pub use crate::term::border::Border;
+
+mod border;
 
 type Ansi = &'static str;
 
@@ -51,6 +54,7 @@ pub enum Colour {
     Red,
     Yellow,
     White,
+    Default,
     Off,
 }
 
@@ -91,6 +95,7 @@ impl Colour {
     pub const fn as_str(&self) -> &'static str {
         match self {
             Colour::Off => COLOUR_OFF,
+            Colour::Default => COLOUR_OFF,
             Colour::Black => BLACK,
             Colour::Blue => BLUE,
             Colour::Cyan => CYAN,
@@ -107,6 +112,7 @@ impl Colour {
     pub const fn as_bg_str(&self) -> &'static str {
         match self {
             Colour::Off => BG_COLOUR_OFF,
+            Colour::Default => BG_COLOUR_OFF,
             Colour::Black => BLACK_BG,
             Colour::Blue => BLUE_BG,
             Colour::Cyan => CYAN_BG,
@@ -191,10 +197,7 @@ pub struct PrinterBuilder {
     bg_suffix: &'static str,
     underline_prefix: &'static str,
     underline_suffix: &'static str,
-    overline_prefix: &'static str,
-    overline_suffix: &'static str,
-    frame_prefix: &'static str,
-    frame_suffix: &'static str,
+    border: Border,
 }
 
 pub struct Printer {
@@ -212,10 +215,7 @@ impl Printer {
             bg_suffix: "",
             underline_prefix: "",
             underline_suffix: "",
-            overline_prefix: "",
-            overline_suffix: "",
-            frame_prefix: "",
-            frame_suffix: "",
+            border: Border::None,
         }
     }
 
@@ -259,10 +259,15 @@ impl Printer {
     where
         T: Display,
     {
+        let (border_top, border_prefix, border_suffix, border_bottom) = self
+            .config
+            .border
+            .generate_border_components(str.as_ref().len());
+
         format!(
             "{}{}{}{}{}{}{str}{}{}{}{}{}{}",
-            self.config.frame_prefix,
-            self.config.overline_prefix,
+            border_top,
+            border_prefix,
             self.config.underline_prefix,
             self.config.bold_prefix,
             self.config.bg_prefix,
@@ -271,8 +276,8 @@ impl Printer {
             self.config.bg_suffix,
             self.config.bold_suffix,
             self.config.underline_suffix,
-            self.config.overline_suffix,
-            self.config.frame_suffix,
+            border_suffix,
+            border_bottom,
         )
     }
 }
@@ -302,23 +307,8 @@ impl PrinterBuilder {
         self
     }
 
-    pub const fn set_overline(mut self) -> Self {
-        self.overline_prefix = OVERLINE_ON;
-        self.overline_suffix = OVERLINE_OFF;
-        self
-    }
-
-    /// Mutually exclusive with set_encircled
-    pub const fn set_framed(mut self) -> Self {
-        self.frame_prefix = FRAMED_ON;
-        self.frame_suffix = FRAMED_ENCIRCLED_OFF;
-        self
-    }
-
-    /// Mutually exclusive with set_framed
-    pub const fn set_encircled(mut self) -> Self {
-        self.frame_prefix = ENCIRCLED_ON;
-        self.frame_suffix = FRAMED_ENCIRCLED_OFF;
+    pub const fn set_border(mut self, border: Border) -> Self {
+        self.border = border;
         self
     }
 

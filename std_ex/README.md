@@ -2,7 +2,7 @@
 
 A crate I use to extend the std library.
 
-To alias this crate as std, add the following to the `Cargo.toml`
+To alias this crate as std, add the following to `Cargo.toml`
 
 ```
 [dependencies]
@@ -15,5 +15,5 @@ std = { package = "std_ex", git = "https://github.com/probablyanewt/rustlets" }
   - `fn var_exists` tests if env var exists
 - `fmt`
   - `fn pretty` formats any type which implements `Debug` as a pretty string
-- `time`
+- `chrono`
   - Chrono crate
